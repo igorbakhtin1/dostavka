@@ -1,0 +1,82 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Order {
+  id                String             @id @default(cuid())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  pointA            String?
+  weight            Int?
+  size              String?
+  remuneration      Float?
+  status            EnumOrderStatus?
+  description       String?
+  pointB            String?
+  deliveryTime      DateTime?
+  sender            String?
+  deliveryContracts DeliveryContract[]
+}
+
+model PerformerProfile {
+  id                String             @id @default(cuid())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  feedbacks         Feedback[]
+  rating            Float?
+  deliveryContracts DeliveryContract[]
+  user              User?              @relation(fields: [userId], references: [id])
+  userId            String?
+}
+
+model DeliveryContract {
+  id                 String                      @id @default(cuid())
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+  terms              String?
+  price              Float?
+  status             EnumDeliveryContractStatus?
+  order              Order?                      @relation(fields: [orderId], references: [id])
+  orderId            String?
+  performerProfile   PerformerProfile?           @relation(fields: [performerProfileId], references: [id])
+  performerProfileId String?
+}
+
+model Feedback {
+  id                 String            @id @default(cuid())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  comment            String?
+  rating             Int?
+  user               User?             @relation(fields: [userId], references: [id])
+  userId             String?
+  performerProfile   PerformerProfile? @relation(fields: [performerProfileId], references: [id])
+  performerProfileId String?
+}
+
+model User {
+  id                String             @id @default(cuid())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  firstName         String?
+  lastName          String?
+  username          String             @unique
+  email             String?            @unique
+  password          String
+  roles             Json
+  feedbacks         Feedback[]
+  performerProfiles PerformerProfile[]
+}
+
+enum EnumOrderStatus {
+  Option1
+}
+
+enum EnumDeliveryContractStatus {
+  Option1
+}
